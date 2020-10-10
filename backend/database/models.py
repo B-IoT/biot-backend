@@ -1,13 +1,14 @@
-from sqlalchemy import Column, Integer, Float, String
+from sqlalchemy import Table, Column, Integer, Float, String
 
-from .database import Base
+from .database import metadata
 
-class Item(Base):
-    __tablename__ = "items"
-
-    id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, index=True)
-    status = Column(String, index=True)
-    battery = Column(Integer)
-    latitude = Column(Float, index=True)
-    longitude = Column(Float, index=True)
+items = Table(
+    "items",
+    metadata,
+    Column("id", Integer, primary_key=True, index=True),
+    Column("type", String, index=True),
+    Column("status", String, index=True),
+    Column("battery", Integer),
+    Column("latitude", Float, index=True),
+    Column("longitude", Float, index=True)
+)

@@ -7,13 +7,16 @@ class StatusEnum(str, Enum):
     unavailable = "unavailable"
 
 
-class Item(BaseModel):
-    id: int
+class BaseItem(BaseModel):
     type: str
     status: StatusEnum
     battery: int
     latitude: float
     longitude: float
+
+
+class Item(BaseItem):
+    id: int
 
     class Config:
         orm_mode = True
