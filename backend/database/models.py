@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, Float, String
 
-from .database import metadata
+from .db import metadata
 
 items = Table(
     "items",

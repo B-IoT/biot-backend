@@ -1,12 +1,18 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from aiohttp import ClientSession
 from typing import List
-
 from databases import Database
 
+
+import ujson
+
 from database import crud, models, schemas
-from database.database import database, engine
+from database.db import database, engine
+from kontakt import api
+from settings import KEYS
+
 
 models.metadata.create_all(bind=engine)
 
@@ -30,6 +36,10 @@ def get_db():
     return database
 
 
+headers = {"Api-Key": KEYS["kontakt_api_key"]}
+session = ClientSession(json_serialize=ujson.dumps, headers=headers)
+
+
 @app.on_event("startup")
 async def startup():
     await database.connect()
@@ -37,6 +47,7 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
+    await session.close()
     await database.disconnect()
 
 
