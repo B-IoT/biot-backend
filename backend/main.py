@@ -36,7 +36,10 @@ def get_db():
     return database
 
 
-headers = {"Api-Key": KEYS["kontakt_api_key"]}
+headers = {
+    "Api-Key": KEYS["kontakt_api_key"],
+    "Accept": "application/vnd.com.kontakt+json;version=10",
+}
 session = ClientSession(json_serialize=ujson.dumps, headers=headers)
 
 
@@ -44,13 +47,11 @@ session = ClientSession(json_serialize=ujson.dumps, headers=headers)
 async def startup():
     await database.connect()
     is_initialized = await crud.is_initialized(database)
-    # items = await api.get_items(session)
+    items = await api.get_items(session)
     if is_initialized:
-        pass
-        # await crud.update_items(database, items)
+        await crud.update_items(database, items)
     else:
-        pass
-        # await crud.add_items(database, items)
+        await crud.add_items(database, items)
 
 
 @app.on_event("shutdown")
@@ -61,14 +62,19 @@ async def shutdown():
 
 @app.get("/items", response_model=List[schemas.Item])
 async def get_items(skip: int = 0, limit: int = 100, db: Database = Depends(get_db)):
-    # items = await api.get_items(session)
-    # await crud.update_items(database, items)
+    items = await api.get_items(session)
+    await crud.update_items(database, items)
     return await crud.get_items(db, skip=skip, limit=limit)
 
 
 @app.get("/items/{item_id}", response_model=schemas.Item)
 async def get_item(item_id: int, db: Database = Depends(get_db)):
-    # item = await api.get_item(item_id) # TODO: use kontakt id not db id
+    db_item = await crud.get_item(db, item_id=item_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item = await api.get_item(session, db_item.kontaktId)
+    await crud.update_item(database, item)
 
     db_item = await crud.get_item(db, item_id=item_id)
     if db_item is None:
@@ -78,6 +84,9 @@ async def get_item(item_id: int, db: Database = Depends(get_db)):
 
 
 @app.post("/items", response_model=schemas.Item)
-async def create_item(item: schemas.BaseItem, db: Database = Depends(get_db)):
-    last_record_id = await crud.add_item(db=db, item=item)
-    return {**item.dict(), "id": last_record_id}
+async def create_item(item: schemas.TypedItem, db: Database = Depends(get_db)):
+    kontakt_item = await api.get_item(session, item.kontaktId)
+    new_item = schemas.TypedItem(type=item.type, **kontakt_item.dict())
+    last_record_id = await crud.add_item(db=db, item=new_item)
+
+    return {**new_item.dict(), "id": last_record_id}
