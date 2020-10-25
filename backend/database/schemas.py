@@ -31,7 +31,7 @@ class TypedItem(BaseItem):
     # TODO: define type and service as an Enum
 
 
-class Item(BaseItem):
+class Item(TypedItem):
     id: int
 
     class Config:
