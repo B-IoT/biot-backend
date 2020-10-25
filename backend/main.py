@@ -86,7 +86,9 @@ async def get_item(item_id: int, db: Database = Depends(get_db)):
 @app.post("/items", response_model=schemas.Item)
 async def create_item(item: schemas.TypedItem, db: Database = Depends(get_db)):
     kontakt_item = await api.get_item(session, item.kontaktId)
-    new_item = schemas.TypedItem(type=item.type, **kontakt_item.dict())
+    new_item = schemas.TypedItem(
+        type=item.type, service=item.service, **kontakt_item.dict()
+    )
     last_record_id = await crud.add_item(db=db, item=new_item)
 
     return {**new_item.dict(), "id": last_record_id}

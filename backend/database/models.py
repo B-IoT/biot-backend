@@ -8,6 +8,7 @@ items = Table(
     Column("id", Integer, primary_key=True, index=True),
     Column("kontaktId", String, index=True),
     Column("type", String, index=True),
+    Column("service", String, index=True),
     Column("status", String, index=True),
     Column("battery", Integer),
     Column("lastEventTimestamp", DateTime, index=True),

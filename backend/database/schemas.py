@@ -26,8 +26,9 @@ class BaseItem(BaseModel):
 
 class TypedItem(BaseItem):
     type: str
+    service: str
 
-    # TODO: define type as an Enum
+    # TODO: define type and service as an Enum
 
 
 class Item(BaseItem):
