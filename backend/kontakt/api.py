@@ -9,9 +9,9 @@ API_URL = "https://api.kontakt.io"
 
 def extract_item_from_json(device_json, status_json):
     return schemas.BaseItem(
-        kontaktId=device_json["uniqueId"],
+        beaconId=device_json["uniqueId"],
         battery=status_json["batteryLevel"],
-        lastEventTimestamp=datetime.utcfromtimestamp(status_json["lastEventTimestamp"]),
+        lastSeen=datetime.fromtimestamp(device_json["lastSeen"]),
         latitude=device_json["lat"],
         longitude=device_json["lng"],
     )

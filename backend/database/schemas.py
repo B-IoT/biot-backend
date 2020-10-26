@@ -9,12 +9,12 @@ class StatusEnum(str, Enum):
 
 
 class BaseItem(BaseModel):
-    kontaktId: str
+    beaconId: str
     status: StatusEnum = StatusEnum.available
     battery: int = 100
     latitude: float = 0
     longitude: float = 0
-    lastEventTimestamp: datetime = datetime.utcnow()
+    lastSeen: datetime = datetime.now()
 
     @validator("battery")
     def battery_must_be_in_range(cls, v):

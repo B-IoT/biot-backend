@@ -1,3 +1,4 @@
+source .env/bin/activate 
 alembic stamp head 
 alembic revision --autogenerate -m "$1"
 echo "Do you want to migrate? [y/n]"

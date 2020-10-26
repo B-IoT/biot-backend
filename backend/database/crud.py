@@ -42,19 +42,19 @@ def add_items(db: Database, items: List[schemas.TypedItem]):
 
 
 def update_item(db: Database, item: schemas.BaseItem):
-    query = models.items.update().where(models.items.c.kontaktId == item.kontaktId)
+    query = models.items.update().where(models.items.c.beaconId == item.beaconId)
     return db.execute(query=query, values=item.dict())
 
 
 def update_item(db: Database, item: schemas.TypedItem):  # for frontend
-    query = models.items.update().where(models.items.c.kontaktId == item.kontaktId)
+    query = models.items.update().where(models.items.c.beaconId == item.beaconId)
     return db.execute(query=query, values=item.dict())
 
 
 def update_items(db: Database, items: List[schemas.BaseItem]):
     queries = []
     for item in items:
-        query = models.items.update().where(models.items.c.kontaktId == item.kontaktId)
+        query = models.items.update().where(models.items.c.beaconId == item.beaconId)
         queries.append(db.execute(query=query, values=item.dict()))
 
     return asyncio.gather(*queries)
@@ -63,7 +63,7 @@ def update_items(db: Database, items: List[schemas.BaseItem]):
 def update_items(db: Database, items: List[schemas.TypedItem]):  # for frontend
     queries = []
     for item in items:
-        query = models.items.update().where(models.items.c.kontaktId == item.kontaktId)
+        query = models.items.update().where(models.items.c.beaconId == item.beaconId)
         queries.append(db.execute(query=query, values=item.dict()))
 
     return asyncio.gather(*queries)

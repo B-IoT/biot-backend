@@ -73,7 +73,7 @@ async def get_item(item_id: int, db: Database = Depends(get_db)):
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    item = await api.get_item(session, db_item.kontaktId)
+    item = await api.get_item(session, db_item.beaconId)
     await crud.update_item(database, item)
 
     db_item = await crud.get_item(db, item_id=item_id)
@@ -85,9 +85,9 @@ async def get_item(item_id: int, db: Database = Depends(get_db)):
 
 @app.post("/items", response_model=schemas.Item)
 async def create_item(item: schemas.TypedItem, db: Database = Depends(get_db)):
-    kontakt_item = await api.get_item(session, item.kontaktId)
+    beacon_item = await api.get_item(session, item.beaconId)
     new_item = schemas.TypedItem(
-        type=item.type, service=item.service, **kontakt_item.dict()
+        type=item.type, service=item.service, **beacon_item.dict()
     )
     last_record_id = await crud.add_item(db=db, item=new_item)
 
