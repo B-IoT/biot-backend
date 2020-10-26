@@ -28,6 +28,19 @@ def combine_devices_statuses(devices_json, statuses_json):
     return devices_statuses.values()
 
 
+# async def trigger_devices_update(session: aiohttp.ClientSession, beacon_ids: List[str]):
+#     async with session.post(
+#         f"{API_URL}/device/update",
+#         data={"uniqueId": beacon_ids, "deviceType": "BEACON"},
+#         headers={
+#             "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+#             "Api-Key": KEYS["kontakt_api_key"],
+#             "Accept": "application/vnd.com.kontakt+json;version=10",
+#         },
+#     ) as r:
+#         print(await r.text())
+
+
 # Get all items
 async def get_items(session: aiohttp.ClientSession) -> List[schemas.BaseItem]:
     async with session.get(f"{API_URL}/device", params={"deviceType": "BEACON"}) as r1:
@@ -47,10 +60,10 @@ async def get_items(session: aiohttp.ClientSession) -> List[schemas.BaseItem]:
             return devices
 
 
-async def get_item(session: aiohttp.ClientSession, item_id: int) -> schemas.BaseItem:
-    async with session.get(f"{API_URL}/device", params={"uniqueId": [item_id]}) as r1:
+async def get_item(session: aiohttp.ClientSession, beacon_id: int) -> schemas.BaseItem:
+    async with session.get(f"{API_URL}/device", params={"uniqueId": [beacon_id]}) as r1:
         async with session.get(
-            f"{API_URL}/device/status", params={"uniqueId": [item_id]}
+            f"{API_URL}/device/status", params={"uniqueId": [beacon_id]}
         ) as r2:
             json = await r1.json()
             status_json = await r2.json()

@@ -48,6 +48,8 @@ async def startup():
     await database.connect()
     is_initialized = await crud.is_initialized(database)
     items = await api.get_items(session)
+    # await api.trigger_devices_update(session, [item.beaconId for item in items])
+    # items = await api.get_items(session)
     if is_initialized:
         await crud.update_items(database, items)
     else:
@@ -63,6 +65,8 @@ async def shutdown():
 @app.get("/items", response_model=List[schemas.Item])
 async def get_items(skip: int = 0, limit: int = 100, db: Database = Depends(get_db)):
     items = await api.get_items(session)
+    # await api.trigger_devices_update(session, [item.beaconId for item in items])
+    # items = await api.get_items(session)
     await crud.update_items(database, items)
     return await crud.get_items(db, skip=skip, limit=limit)
 
@@ -73,6 +77,8 @@ async def get_item(item_id: int, db: Database = Depends(get_db)):
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
+    # item = await api.get_item(session, db_item.beaconId)
+    # await api.trigger_devices_update(session, [item.beaconId])
     item = await api.get_item(session, db_item.beaconId)
     await crud.update_item(database, item)
 
@@ -86,6 +92,9 @@ async def get_item(item_id: int, db: Database = Depends(get_db)):
 @app.post("/items", response_model=schemas.Item)
 async def create_item(item: schemas.TypedItem, db: Database = Depends(get_db)):
     beacon_item = await api.get_item(session, item.beaconId)
+    # await api.trigger_devices_update(session, [beacon_item.beaconId])
+    # beacon_item = await api.get_item(session, item.beaconId)
+
     new_item = schemas.TypedItem(
         type=item.type, service=item.service, **beacon_item.dict()
     )
