@@ -4,6 +4,7 @@ from typing import List
 import asyncio
 
 from . import models, schemas
+from security import security
 
 
 def is_initialized(db: Database) -> bool:
@@ -67,3 +68,17 @@ def update_items(db: Database, items: List[schemas.TypedItem]):  # for frontend
         queries.append(db.execute(query=query, values=item.dict()))
 
     return asyncio.gather(*queries)
+
+
+def get_user(db: Database, email: str) -> schemas.UserInDB:
+    query = models.users.select().where(models.users.c.email == email)
+    return db.fetch_one(query)
+
+
+def create_user(db: Database, user: schemas.UserToCreate):
+    query = models.users.insert()
+    new_user = {
+        "email": user.email,
+        "hashedPassword": security.get_password_hash(user.password),
+    }
+    return db.execute(query=query, values=new_user)

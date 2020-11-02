@@ -1,6 +1,7 @@
 from pydantic import BaseModel, validator
 from enum import Enum
 from datetime import datetime
+from typing import Optional
 
 
 class StatusEnum(str, Enum):
@@ -33,6 +34,23 @@ class TypedItem(BaseItem):
 
 class Item(TypedItem):
     id: int
+
+    class Config:
+        orm_mode = True
+
+
+class User(BaseModel):
+    email: str
+    disabled: Optional[bool] = None
+
+
+class UserToCreate(User):
+    password: str
+
+
+class UserInDB(User):
+    id: int
+    hashedPassword: str
 
     class Config:
         orm_mode = True

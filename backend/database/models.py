@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, Float, String, DateTime
+from sqlalchemy import Table, Column, Integer, Float, String, DateTime, Boolean
 
 from .db import metadata
 
@@ -14,4 +14,13 @@ items = Table(
     Column("lastSeen", DateTime, index=True),
     Column("latitude", Float, index=True),
     Column("longitude", Float, index=True),
+)
+
+users = Table(
+    "users",
+    metadata,
+    Column("id", Integer, primary_key=True, index=True),
+    Column("email", String, index=True),
+    Column("disabled", Boolean),
+    Column("hashedPassword", String),
 )

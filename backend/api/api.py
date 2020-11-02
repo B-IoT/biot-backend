@@ -4,10 +4,16 @@ from typing import List
 from datetime import datetime
 from collections import defaultdict
 
+from settings import KEYS
+
 API_URL = "https://api.kontakt.io"
+APPS_API_URL = "https://apps-api.prod.kontakt.io/v2"
+
+COMMON_HEADERS = {"Accept": "application/vnd.com.kontakt+json;version=10"}
 
 
-def extract_item_from_json(device_json, status_json):
+def extract_item_from_json(device_json, status_json, positions):
+    # TODO: compute status
     return schemas.BaseItem(
         beaconId=device_json["uniqueId"],
         battery=status_json["batteryLevel"],
@@ -28,42 +34,48 @@ def combine_devices_statuses(devices_json, statuses_json):
     return devices_statuses.values()
 
 
-# async def trigger_devices_update(session: aiohttp.ClientSession, beacon_ids: List[str]):
-#     async with session.post(
-#         f"{API_URL}/device/update",
-#         data={"uniqueId": beacon_ids, "deviceType": "BEACON"},
-#         headers={
-#             "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-#             "Api-Key": KEYS["kontakt_api_key"],
-#             "Accept": "application/vnd.com.kontakt+json;version=10",
-#         },
-#     ) as r:
-#         print(await r.text())
+async def get_positions(session: aiohttp.ClientSession):
+    async with session.get(
+        f"{APPS_API_URL}/positions",
+    ) as r:
+        json = await r.json()
+        content = json["content"]
+        return [(device["lat"], device["lng"], device["trackingId"]) for device in content]
 
 
 # Get all items
 async def get_items(session: aiohttp.ClientSession) -> List[schemas.BaseItem]:
-    async with session.get(f"{API_URL}/device", params={"deviceType": "BEACON"}) as r1:
-        async with session.get(f"{API_URL}/device/status") as r2:
+    async with session.get(
+        f"{API_URL}/device", headers=COMMON_HEADERS, params={"deviceType": "BEACON"}
+    ) as r1:
+        async with session.get(
+            f"{API_URL}/device/status", headers=COMMON_HEADERS
+        ) as r2:
             json = await r1.json()
             status_json = await r2.json()
             devices_json = json["devices"]
             statuses_json = status_json["statuses"]
 
             devices_statuses = combine_devices_statuses(devices_json, statuses_json)
+            positions = await get_positions(session)
 
             devices = [
-                extract_item_from_json(device_status[0], device_status[1])
+                extract_item_from_json(device_status[0], device_status[1], positions)
                 for device_status in devices_statuses
             ]
 
+            
             return devices
 
 
 async def get_item(session: aiohttp.ClientSession, beacon_id: int) -> schemas.BaseItem:
-    async with session.get(f"{API_URL}/device", params={"uniqueId": [beacon_id]}) as r1:
+    async with session.get(
+        f"{API_URL}/device", headers=COMMON_HEADERS, params={"uniqueId": [beacon_id]}
+    ) as r1:
         async with session.get(
-            f"{API_URL}/device/status", params={"uniqueId": [beacon_id]}
+            f"{API_URL}/device/status",
+            headers=COMMON_HEADERS,
+            params={"uniqueId": [beacon_id]},
         ) as r2:
             json = await r1.json()
             status_json = await r2.json()
