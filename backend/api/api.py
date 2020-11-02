@@ -4,8 +4,6 @@ from typing import List
 from datetime import datetime
 from collections import defaultdict
 
-from settings import KEYS
-
 API_URL = "https://api.kontakt.io"
 APPS_API_URL = "https://apps-api.prod.kontakt.io/v2"
 

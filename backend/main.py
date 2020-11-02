@@ -14,13 +14,14 @@ from jose import jwt, JWTError
 
 import ujson
 import secrets
+import os
 
 
 from database import crud, models, schemas
 from database.db import database, engine
 from api import api
 from security import security
-from settings import KEYS
+from settings import KONTAKT_API_KEY
 
 
 models.metadata.create_all(bind=engine)
@@ -81,7 +82,7 @@ async def get_current_active_user(
 
 
 headers = {
-    "Api-Key": KEYS["kontakt_api_key"],
+    "Api-Key": KONTAKT_API_KEY,
 }
 session = ClientSession(json_serialize=ujson.dumps, headers=headers)
 
