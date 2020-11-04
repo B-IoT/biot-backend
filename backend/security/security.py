@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 from databases import Database
 
-from database import crud
+from database import crud, schemas
 
 SECRET_KEY = "74c7f92aad5815515b12925f120e6a20eeae42d4708424b7480fadd6a9e1f732"
 ALGORITHM = "HS256"
@@ -47,7 +47,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 async def authenticate_user(db: Database, email: str, password: str):
-    user = await crud.get_user(db, email)
+    user = schemas.UserInDB.parse_obj(await crud.get_user(db, email))
     if not user:
         return None
     if not verify_password(password, user.hashedPassword):

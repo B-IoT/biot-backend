@@ -77,8 +77,7 @@ def get_user(db: Database, email: str) -> schemas.UserInDB:
 
 def create_user(db: Database, user: schemas.UserToCreate):
     query = models.users.insert()
-    new_user = {
-        "email": user.email,
-        "hashedPassword": security.get_password_hash(user.password),
-    }
-    return db.execute(query=query, values=new_user)
+    new_user = schemas.UserInDBBase(
+        email=user.email, hashedPassword=security.get_password_hash(user.password)
+    )
+    return db.execute(query=query, values=new_user.dict())

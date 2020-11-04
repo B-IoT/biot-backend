@@ -15,7 +15,7 @@ class BaseItem(BaseModel):
     battery: int = 100
     latitude: float = 0
     longitude: float = 0
-    lastSeen: datetime = datetime.now()
+    lastSeen: datetime = datetime.today()
 
     @validator("battery")
     def battery_must_be_in_range(cls, v):
@@ -26,8 +26,8 @@ class BaseItem(BaseModel):
 
 
 class TypedItem(BaseItem):
-    type: str
-    service: str
+    type: Optional[str] = None
+    service: Optional[str] = None
 
     # TODO: define type and service as an Enum
 
@@ -48,9 +48,12 @@ class UserToCreate(User):
     password: str
 
 
-class UserInDB(User):
-    id: int
+class UserInDBBase(User):
     hashedPassword: str
+
+
+class UserInDB(UserInDBBase):
+    id: int
 
     class Config:
         orm_mode = True

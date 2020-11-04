@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, Float, String, DateTime, Boolean
+from sqlalchemy import Table, Column, Integer, Float, String, TIMESTAMP, Boolean
 
 from .db import metadata
 
@@ -11,7 +11,7 @@ items = Table(
     Column("service", String, index=True),
     Column("status", String, index=True),
     Column("battery", Integer),
-    Column("lastSeen", DateTime, index=True),
+    Column("lastSeen", TIMESTAMP, index=True),
     Column("latitude", Float, index=True),
     Column("longitude", Float, index=True),
 )

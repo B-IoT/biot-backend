@@ -67,7 +67,7 @@ async def get_current_user(
         token_data = security.TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = await crud.get_user(db, email=token_data.email)
+    user = schemas.User.parse_obj(await crud.get_user(db, email=token_data.email))
     if user is None:
         raise credentials_exception
     return user
@@ -90,14 +90,14 @@ session = ClientSession(json_serialize=ujson.dumps, headers=headers)
 @app.on_event("startup")
 async def startup():
     await database.connect()
-    is_initialized = await crud.is_initialized(database)
-    items = await api.get_items(session)
-    # await api.trigger_devices_update(session, [item.beaconId for item in items])
+    # is_initialized = await crud.is_initialized(database)
     # items = await api.get_items(session)
-    if is_initialized:
-        await crud.update_items(database, items)
-    else:
-        await crud.add_items(database, items)
+    # # await api.trigger_devices_update(session, [item.beaconId for item in items])
+    # # items = await api.get_items(session)
+    # if is_initialized:
+    #     await crud.update_items(database, items)
+    # else:
+    #     await crud.add_items(database, items)
 
 
 @app.on_event("shutdown")
@@ -131,11 +131,12 @@ async def get_items(
     db: Database = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_user),
 ):
-    items = await api.get_items(session)
-    # await api.trigger_devices_update(session, [item.beaconId for item in items])
     # items = await api.get_items(session)
-    await crud.update_items(database, items)
-    return await crud.get_items(db, skip=skip, limit=limit)
+    # # await api.trigger_devices_update(session, [item.beaconId for item in items])
+    # # items = await api.get_items(session)
+    # await crud.update_items(database, items)
+    items = await crud.get_items(db, skip=skip, limit=limit)
+    return [schemas.Item.parse_obj(item) for item in items]
 
 
 @app.get("/items/{item_id}", response_model=schemas.Item)
@@ -144,20 +145,20 @@ async def get_item(
     db: Database = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_user),
 ):
-    db_item = await crud.get_item(db, item_id=item_id)
-    if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+    # db_item = await crud.get_item(db, item_id=item_id)
+    # if db_item is None:
+    #     raise HTTPException(status_code=404, detail="Item not found")
 
+    # # item = await api.get_item(session, db_item.beaconId)
+    # # await api.trigger_devices_update(session, [item.beaconId])
     # item = await api.get_item(session, db_item.beaconId)
-    # await api.trigger_devices_update(session, [item.beaconId])
-    item = await api.get_item(session, db_item.beaconId)
-    await crud.update_item(database, item)
+    # await crud.update_item(database, item)
 
     db_item = await crud.get_item(db, item_id=item_id)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    return db_item
+    return schemas.Item.parse_obj(db_item)
 
 
 @app.post("/items", response_model=schemas.Item)
@@ -166,16 +167,16 @@ async def create_item(
     db: Database = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_user),
 ):
-    beacon_item = await api.get_item(session, item.beaconId)
-    # await api.trigger_devices_update(session, [beacon_item.beaconId])
     # beacon_item = await api.get_item(session, item.beaconId)
+    # # await api.trigger_devices_update(session, [beacon_item.beaconId])
+    # # beacon_item = await api.get_item(session, item.beaconId)
 
-    new_item = schemas.TypedItem(
-        type=item.type, service=item.service, **beacon_item.dict()
-    )
-    last_record_id = await crud.add_item(db=db, item=new_item)
+    # new_item = schemas.TypedItem(
+    #     type=item.type, service=item.service, **beacon_item.dict()
+    # )
+    last_record_id = await crud.add_item(db=db, item=item)
 
-    return {**new_item.dict(), "id": last_record_id}
+    return {**item.dict(), "id": last_record_id}
 
 
 def authenticate_for_user_creation(
