@@ -201,3 +201,8 @@ async def create_user(
 ):
     last_record_id = await crud.create_user(db=db, user=user)
     return {**user.dict(), "id": last_record_id}
+
+
+@app.post("/echo")
+async def echo(data):
+    return data
