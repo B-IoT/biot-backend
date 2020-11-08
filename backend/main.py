@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
@@ -8,7 +8,7 @@ from fastapi.security import (
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
 from aiohttp import ClientSession
-from typing import List
+from typing import List, Any
 from databases import Database
 from jose import jwt, JWTError
 
@@ -204,5 +204,5 @@ async def create_user(
 
 
 @app.post("/echo")
-async def echo(data):
+async def echo(data: Any = Body(...)):
     return data
